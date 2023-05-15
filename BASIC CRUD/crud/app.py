@@ -3,87 +3,113 @@ import json
 items = {}
 
 def lambda_handler(event, context):
-    print("Chegou na lambda")
-    path = event['path']
-    item_id = event['pathParameters']['id']
+    httpMethod = event['httpMethod']
 
-    if path == '/items' and event['httpMethod'] == 'GET':
-        return get_all_items()
-    elif path == '/items' and event['httpMethod'] == 'POST':
-        body = json.loads(event['body'])
-        return create_item(body)
-    elif path == f'/items/{item_id}' and event['httpMethod'] == 'GET':
-        return get_item(item_id)
-    elif path == f'/items/{item_id}' and event['httpMethod'] == 'PUT':
-        body = json.loads(event['body'])
-        return update_item(item_id, body)
-    elif path == f'/items/{item_id}' and event['httpMethod'] == 'DELETE':
-        return delete_item(item_id)
+    if httpMethod == 'GET':
+        if 'pathParameters' in event and event['pathParameters'] and 'id' in event['pathParameters']:
+            id = event['pathParameters']['id']
+            if id in items:
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps(items[id]),
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+            else:
+                return {
+                    'statusCode': 404,
+                    'body': 'Item not found',
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+        else:
+            return {
+                'statusCode': 200,
+                'body': json.dumps(items),
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                },
+            }
+
+    elif httpMethod == 'POST':
+        item = json.loads(event['body'])
+        id = str(len(items) + 1)
+        items[id] = item
+        return {
+            'statusCode': 201,
+            'body': json.dumps({'id': id}),
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            },
+        }
+
+    elif httpMethod == 'PUT':
+        if 'pathParameters' in event and event['pathParameters'] and 'id' in event['pathParameters']:
+            id = event['pathParameters']['id']
+            if id in items:
+                items[id] = json.loads(event['body'])
+                return {
+                    'statusCode': 200,
+                    'body': 'Item updated',
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+            else:
+                return {
+                    'statusCode': 404,
+                    'body': 'Item not found',
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+
+    elif httpMethod == 'DELETE':
+        if 'pathParameters' in event and event['pathParameters'] and 'id' in event['pathParameters']:
+            id = event['pathParameters']['id']
+            if id in items:
+                del items[id]
+                return {
+                    'statusCode': 200,
+                    'body': 'Item deleted',
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+            else:
+                return {
+                    'statusCode': 404,
+                    'body': 'Item not found',
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                    },
+                }
+
     else:
         return {
-            'statusCode': 404,
-            'body': json.dumps('Invalid path'),
-            'headers': {'Content-Type': 'application/json'}
-        }
-    
-def get_all_items():
-    return {
-        'statusCode': 200,
-        'body': json.dumps(list(items.values())),
-        'headers': {'Content-Type': 'application/json'}
-    }
-
-def get_item(item_id):
-    if item_id in items:
-        return {
-            'statusCode': 200,
-            'body': json.dumps(items[item_id]),
-            'headers': {'Content-Type': 'application/json'}
-        }
-    else:
-        return {
-            'statusCode': 404,
-            'body': json.dumps('Item not found'),
-            'headers': {'Content-Type': 'application/json'}
-        }
-
-def create_item(item):
-    item_id = str(len(items) + 1)
-    item['id'] = item_id
-    items[item_id] = item
-    return {
-        'statusCode': 201,
-        'body': json.dumps(item),
-        'headers': {'Content-Type': 'application/json'}
-    }
-
-def update_item(item_id, updated_item):
-    if item_id in items:
-        updated_item['id'] = item_id
-        items[item_id] = updated_item
-        return {
-            'statusCode': 200,
-            'body': json.dumps(updated_item),
-            'headers': {'Content-Type': 'application/json'}
-        }
-    else:
-        return {
-            'statusCode': 404,
-            'body': json.dumps('Item not found'),
-            'headers': {'Content-Type': 'application/json'}
-        }
-
-def delete_item(item_id):
-    if item_id in items:
-        del items[item_id]
-        return {
-            'statusCode': 204,
-            'body': '',
-            'headers': {'Content-Type': 'application/json'}
-        }
-    else:
-        return {
-            'statusCode': 404,
-            'body': json.dumps('Item not found'),
-            'headers': {'Content-Type': 'application/json'}
+            'statusCode': 405,
+            'body': 'Method not supported',
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  # Use '*' to allow any origin or replace '*' with your specific origin
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            },
         }

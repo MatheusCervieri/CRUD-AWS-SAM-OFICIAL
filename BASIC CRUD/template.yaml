@@ -14,6 +14,11 @@ Globals:
     Tracing: Active
   Api:
     TracingEnabled: true
+    Cors:
+      AllowMethods: "'OPTIONS,GET,PUT,POST,DELETE'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+
 Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -42,6 +47,11 @@ Resources:
           Type: Api
           Properties:
             Path: /items/{id}
+            Method: get
+        ReadAll:
+          Type: Api
+          Properties:
+            Path: /items
             Method: get
         CreateItem:
           Type: Api
