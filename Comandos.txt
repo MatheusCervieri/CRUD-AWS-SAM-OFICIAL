@@ -5,7 +5,7 @@ Começar o lacalstack:
 localstack start
 
 Iniciar a api com o SAM:
-sam local start-api --docker-network=host
+sam local start-api
 
 Testando a api com o curl:
 
