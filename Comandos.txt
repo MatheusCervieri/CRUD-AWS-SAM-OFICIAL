@@ -1,0 +1,22 @@
+Se precisar instalar as dependências (requeirements.txt)
+pip install -r requirements.txt
+
+Começar o lacalstack:
+localstack start
+
+Iniciar a api com o SAM:
+sam local start-api --docker-network=host
+
+Testando a api com o curl:
+
+Create:
+curl.exe -X POST -H "Content-Type: application/json" -d "{\"id\":\"1\", \"name\":\"Test Item\"}" http://localhost:3000/create
+
+READ
+curl.exe http://localhost:3000/read/1
+
+PUT:
+curl.exe -X PUT -H "Content-Type: application/json" -d "{\"name\":\"Updated Item\"}" http://localhost:3000/update/1
+
+DELETE
+curl.exe -X DELETE http://localhost:3000/delete/1
